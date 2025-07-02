@@ -5,51 +5,52 @@ from fuzzywuzzy import fuzz
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-# Page Configuration
-st.set_page_config(page_title="Resume Analyzer", page_icon="📄", layout="centered")
+# -------------------- PAGE CONFIG --------------------
+st.set_page_config(
+    page_title="Resume Analyzer by Vaibhav",
+    page_icon="📄",
+    layout="centered",
+    initial_sidebar_state="auto"
+)
 
-# App Header
-st.markdown("👨‍💻 Built with ❤️ by **Vaibhav B N**")
-st.markdown("🚀 Powered by Python, spaCy (NLP), and Streamlit")
+# -------------------- HEADER --------------------
+st.markdown("## 👨‍💻 Built with ❤️ by **Vaibhav B N**")
+st.markdown("### 🚀 Powered by Python, spaCy (NLP), and Streamlit")
 
-# Load spaCy model with fallback
-try:
-    nlp = spacy.load("en_core_web_sm")
-except:
-    from spacy.cli import download
-    download("en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
+# -------------------- LOAD NLP MODEL --------------------
+nlp = spacy.load("en_core_web_sm")
 
-# Extract text from PDF
+# -------------------- FUNCTIONS --------------------
 def extract_text_from_pdf(file):
-    reader = PyPDF2.PdfReader(file)
-    return "".join(page.extract_text() or "" for page in reader.pages)
+    pdf_reader = PyPDF2.PdfReader(file)
+    text = ""
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+    return text
 
-# Extract keywords using spaCy
 def extract_keywords(text):
     doc = nlp(text.lower())
     return list(set([token.text for token in doc if token.is_alpha and not token.is_stop]))
 
-# Calculate job fit score
 def calculate_job_fit(resume_keywords, jd_keywords):
     matched = set(resume_keywords) & set(jd_keywords)
     score = int(len(matched) / len(jd_keywords) * 100) if jd_keywords else 0
     return score, matched
 
-# Generate word cloud
 def generate_wordcloud(keywords):
     text = " ".join(keywords)
     return WordCloud(width=800, height=400, background_color='white').generate(text)
 
-# Sidebar
+# -------------------- SIDEBAR --------------------
 st.sidebar.title("📂 Resume Analyzer")
-st.sidebar.info("Upload your resume and paste a job description to get results.")
+st.sidebar.info("Upload your resume and paste a job description to get match results.")
 
-# Tabs
+# -------------------- UI TABS --------------------
 tab1, tab2 = st.tabs(["📄 Analyze", "📊 Summary"])
 
 with tab1:
     st.title("Upload & Analyze Resume")
+
     resume_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
     jd_text = st.text_area("Paste Job Description")
 
@@ -59,7 +60,7 @@ with tab1:
         jd_keywords = extract_keywords(jd_text)
 
         score, matched = calculate_job_fit(resume_keywords, jd_keywords)
-        missing = set(jd_keywords) - set(resume_keywords)
+        missing_keywords = set(jd_keywords) - set(resume_keywords)
 
         st.success(f"✅ Job Fit Score: {score}%")
         st.markdown(f"**Matched Keywords ({len(matched)}):**")
@@ -72,31 +73,40 @@ with tab1:
         ax_wc.axis('off')
         st.pyplot(fig_wc)
 
-        # Keyword Bar Chart
+        # Bar Chart
         st.subheader("📊 Keyword Match Chart")
+        labels = ['Matched', 'Missing']
+        values = [len(matched), len(missing_keywords)]
         fig_bar, ax_bar = plt.subplots()
-        ax_bar.bar(["Matched", "Missing"], [len(matched), len(missing)], color=["green", "red"])
+        ax_bar.bar(labels, values, color=['green', 'red'])
+        ax_bar.set_ylabel('Keyword Count')
         st.pyplot(fig_bar)
 
-        # Report Download
+        # Downloadable Report
         report = f"""
 Job Fit Score: {score}%
 
-Matched:
+Matched Keywords:
 {', '.join(matched)}
 
-Missing:
-{', '.join(missing)}
-"""
-        st.download_button("📥 Download Report", data=report, file_name="resume_analysis.txt", mime="text/plain")
+Missing Keywords:
+{', '.join(missing_keywords)}
+        """
+        st.download_button(
+            label="📥 Download Report as .txt",
+            data=report,
+            file_name="resume_analysis.txt",
+            mime="text/plain"
+        )
 
     else:
-        st.info("⬆️ Upload a resume and paste a job description to begin.")
+        st.info("⬆️ Upload a PDF resume and paste a job description to begin analysis.")
 
 with tab2:
     st.header("📊 Summary")
+    st.write("This app analyzes your resume and compares it with a job description.")
     st.write("- Extracts and compares keywords using spaCy")
     st.write("- Calculates job fit score")
-    st.write("- Shows matched & missing keywords")
-    st.write("- Visualizes results using word cloud & charts")
+    st.write("- Displays matched & missing keywords")
+    st.write("- Visualizes results with Word Cloud & Charts")
     st.write("- Lets you download a summary report")

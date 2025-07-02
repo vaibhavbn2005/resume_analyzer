@@ -1,0 +1,6 @@
+streamlit
+spacy
+PyPDF2
+fuzzywuzzy
+wordcloud
+matplotlib

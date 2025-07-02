@@ -4,3 +4,4 @@ PyPDF2
 fuzzywuzzy
 wordcloud
 matplotlib
+python-Levenshtein

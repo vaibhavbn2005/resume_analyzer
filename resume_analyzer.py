@@ -13,9 +13,18 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
+# -------------------- META TAGS FOR SOCIAL SHARE --------------------
+st.markdown("""
+    <meta property="og:title" content="Resume Analyzer by Vaibhav">
+    <meta property="og:description" content="Upload your resume and get AI-powered job matching insights.">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <meta property="og:url" content="https://resume-analyzer-98nl.onrender.com">
+    <meta name="twitter:card" content="summary_large_image">
+""", unsafe_allow_html=True)
+
 # -------------------- HEADER --------------------
-st.markdown("## 👨‍💻 Built with ❤️ by **Vaibhav B N**")
-st.markdown("### 🚀 Powered by Python, spaCy (NLP), and Streamlit")
+st.markdown("👨‍💻 Built with ❤️ by **Vaibhav B N**")
+st.markdown("🚀 Powered by Python, spaCy (NLP), and Streamlit")
 
 # -------------------- LOAD NLP MODEL --------------------
 nlp = spacy.load("en_core_web_sm")
